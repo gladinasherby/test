@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Listening Detector</title>
+</head>
+
+<body>
+    <h1>Listening Detector</h1>
+    <p id="username"></p>
+    <ul id="user-list"></ul>
+
+    <script>
+        function getUserName() {
+            let username = prompt("Please enter your name:");
+            document.getElementById("username").innerHTML = "Welcome, " + username + "!";
+            localStorage.setItem("username", username);
+        }
+
+        function getUsers() {
+            fetch("/get_users")
+                .then(response => response.json())
+                .then(data => {
+                    // Clear the list
+                    document.getElementById("user-list").innerHTML = "";
+
+                    // Loop through the list of users and add each one to the list
+                    data.forEach(user => {
+                        let listItem = document.createElement("li");
+                        listItem.innerHTML = `${user.name}: ${user.status}`;
+                        document.getElementById("user-list").appendChild(listItem);
+                    });
+                });
+        }
+
+        function getMessage() {
+            fetch("/get_message")
+                .then(response => response.text())
+                .then(data => {
+                    let username = localStorage.getItem("username");
+                    let listItem = document.createElement("li");
+                    listItem.innerHTML = `${username}: ${data}`;
+
+                    // Add the new status to the top of the list
+                    document.getElementById("user-list").insertBefore(listItem, document.getElementById("user-list").firstChild);
+                });
+        }
+
+        getUserName(); // Call getUserName() function when the page loads
+
+        // Refresh the list of users every 5 seconds
+        setInterval(getUsers, 5000);
+
+        // Check for new status messages every 15 seconds
+        setInterval(getMessage, 15000);
+    </script>
+</body>
+
+</html>
